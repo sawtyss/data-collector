@@ -1,4 +1,4 @@
-package com.gg.dao;
+package com.gg.api;
 
 public class UserResponse {
     private final String userAgent;
