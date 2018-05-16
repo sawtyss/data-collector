@@ -10,8 +10,7 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.*;
 
-import static com.gg.UserResponseStores.createUserResponseStoreOnCircularBuffer;
-import static com.gg.UserResponseStores.createUserResponseStoreOnDeque;
+import static com.gg.UserResponseStores.*;
 import static java.util.stream.Collectors.averagingLong;
 
 public class UserResponseStoreLoadTest {
@@ -27,12 +26,12 @@ public class UserResponseStoreLoadTest {
 
     @Test
     public void shouldCircularBufferStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(createUserResponseStoreOnCircularBuffer(), "Circular buffer-based store");
+        shouldStorageHandleHeavyLoad(createUserResponseStoreOnCircularBuffer(DEFAULT_TIMEOUT, 100), "Circular buffer-based store");
     }
 
     @Test
     public void shouldDequeStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(createUserResponseStoreOnDeque(), "Deque-based store");
+        shouldStorageHandleHeavyLoad(createUserResponseStoreOnDeque(DEFAULT_TIMEOUT, 100), "Deque-based store");
     }
 
     private void shouldStorageHandleHeavyLoad(UserResponseStore responseStore, String storeType) {

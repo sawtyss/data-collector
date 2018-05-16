@@ -10,10 +10,6 @@ public class DequeExpiringStorage<E> implements ExpiringStorage<E> {
     private final int maximumSize;
     private final Deque<DataWithTimeStamp<E>> repository = new ConcurrentLinkedDeque<>();
 
-    public DequeExpiringStorage() {
-        this(DEFAULT_TIMEOUT, DEFAULT_MAXIMUM_SIZE);
-    }
-
     public DequeExpiringStorage(long elementTimeout, int maximumSize) {
         this.elementTimeout = elementTimeout;
         this.maximumSize = maximumSize;

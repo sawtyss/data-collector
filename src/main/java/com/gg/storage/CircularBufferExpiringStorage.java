@@ -10,10 +10,6 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
     private volatile int startIndex;
     private volatile int endIndex;
 
-    public CircularBufferExpiringStorage() {
-        this(DEFAULT_TIMEOUT, DEFAULT_MAXIMUM_SIZE);
-    }
-
     public CircularBufferExpiringStorage(long elementTimeout, int maximumSize) {
         this.elementTimeout = elementTimeout;
         storage = new DataWithTimeStamp[maximumSize];
@@ -26,10 +22,8 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
     public void add(E element) {
         storage[endIndex].setData(element);
         synchronized (incrementLock) {
-            endIndex = (endIndex + 1) % storage.length;
-            if (endIndex == startIndex) {
-                startIndex = (startIndex + 1) % storage.length;
-            }
+            unsafeIncrementEndIndex();
+            incrementStartIndexIfMaximumSizeReached();
         }
     }
 
@@ -44,29 +38,43 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
         int startIndex = this.startIndex;
         int endIndex = this.endIndex;
         if (endIndex < startIndex) {
-            copySplitStorage(result, startIndex, endIndex);
+            copySplitStorageToResult(result, startIndex, endIndex);
         } else {
-            copyContinuousStorage(result, startIndex, endIndex);
+            copyContinuousStorageToResult(result, startIndex, endIndex);
         }
         return result;
     }
 
-    private void copyContinuousStorage(List<E> result, int startIndex, int endIndex) {
+    private void copySplitStorageToResult(List<E> result, int startIndex, int endIndex) {
+        copyContinuousStorageToResult(result, startIndex, storage.length);
+        copyContinuousStorageToResult(result, 0, endIndex+1);
+    }
+
+    private void copyContinuousStorageToResult(List<E> result, int startIndex, int endIndex) {
         for (int i = startIndex; i < endIndex; i++) {
             result.add(storage[i].getData());
         }
     }
 
-    private void copySplitStorage(List<E> result, int startIndex, int endIndex) {
-        copyContinuousStorage(result, startIndex, storage.length);
-        copyContinuousStorage(result, 0, endIndex+1);
-    }
-
     private void removeExpiredElements() {
         synchronized (incrementLock) {
             while (storage[startIndex].isOlderThan(elementTimeout) && startIndex != endIndex) {
-                startIndex = (startIndex + 1) % storage.length;
+                unsafeIncrementStartIndex();
             }
         }
+    }
+
+    private void incrementStartIndexIfMaximumSizeReached() {
+        if (endIndex == startIndex) {
+            unsafeIncrementStartIndex();
+        }
+    }
+
+    private void unsafeIncrementStartIndex() {
+        startIndex = (startIndex + 1) % storage.length;
+    }
+
+    private void unsafeIncrementEndIndex() {
+        endIndex = (endIndex + 1) % storage.length;
     }
 }

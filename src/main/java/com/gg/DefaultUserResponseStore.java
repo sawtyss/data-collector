@@ -29,6 +29,6 @@ class DefaultUserResponseStore implements UserResponseStore {
     }
 
     private boolean isErrorUserResponseCode(UserResponse userResponse) {
-        return userResponse.getResponseCode() >= 400;
+        return userResponse.getResponseCode() >= 400 && userResponse.getResponseCode() < 600;
     }
 }
