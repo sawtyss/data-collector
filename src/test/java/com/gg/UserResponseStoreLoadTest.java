@@ -1,4 +1,4 @@
-package com.gg.storage;
+package com.gg;
 
 import com.gg.api.UserResponse;
 import com.gg.api.UserResponseStore;
