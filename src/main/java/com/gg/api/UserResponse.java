@@ -9,10 +9,6 @@ public class UserResponse {
         this.responseCode = responseCode;
     }
 
-    public UserResponse(UserResponse userResponse) {
-        this(userResponse.getUserAgent(), userResponse.getResponseCode());
-    }
-
     public String getUserAgent() {
         return userAgent;
     }

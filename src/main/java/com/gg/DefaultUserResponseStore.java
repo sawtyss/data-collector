@@ -2,19 +2,14 @@ package com.gg;
 
 import com.gg.api.UserResponse;
 import com.gg.api.UserResponseStore;
-import com.gg.storage.CircularBufferExpiringStorage;
 import com.gg.storage.ExpiringStorage;
 
 import java.util.Collection;
 
-public class DefaultUserResponseStore implements UserResponseStore {
+class DefaultUserResponseStore implements UserResponseStore {
     private ExpiringStorage<UserResponse> dataStore;
 
-    public DefaultUserResponseStore() {
-        this(new CircularBufferExpiringStorage<>());
-    }
-
-    public DefaultUserResponseStore(ExpiringStorage<UserResponse> dataStore) {
+    DefaultUserResponseStore(ExpiringStorage<UserResponse> dataStore) {
         this.dataStore = dataStore;
     }
 

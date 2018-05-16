@@ -1,6 +1,7 @@
 package com.gg.storage;
 
 import com.gg.api.UserResponse;
+import com.gg.api.UserResponseStore;
 import org.junit.Test;
 
 import java.security.SecureRandom;
@@ -9,9 +10,11 @@ import java.util.LinkedList;
 import java.util.UUID;
 import java.util.concurrent.*;
 
+import static com.gg.UserResponseStores.createUserResponseStoreOnCircularBuffer;
+import static com.gg.UserResponseStores.createUserResponseStoreOnDeque;
 import static java.util.stream.Collectors.averagingLong;
 
-public class ExpiringStorageLoadTest {
+public class UserResponseStoreLoadTest {
     private static final SecureRandom RANDOM = new SecureRandom();
     private static final ExecutorService THREAD_POOL = Executors.newFixedThreadPool(8);
 
@@ -24,26 +27,26 @@ public class ExpiringStorageLoadTest {
 
     @Test
     public void shouldCircularBufferStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(new CircularBufferExpiringStorage<>());
+        shouldStorageHandleHeavyLoad(createUserResponseStoreOnCircularBuffer(), "Circular buffer-based store");
     }
 
     @Test
     public void shouldDequeStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(new DequeExpiringStorage<>());
+        shouldStorageHandleHeavyLoad(createUserResponseStoreOnDeque(), "Deque-based store");
     }
 
-    private void shouldStorageHandleHeavyLoad(ExpiringStorage<UserResponse> expiringStorage) {
+    private void shouldStorageHandleHeavyLoad(UserResponseStore responseStore, String storeType) {
         for (int i = 0; i < 4; i++) {
-            taskFutures.add(THREAD_POOL.submit(new HeavyWriterWithRandomData(100000, expiringStorage)));
+            taskFutures.add(THREAD_POOL.submit(new HeavyWriterWithRandomData(100000, responseStore)));
         }
         for (int i = 0; i < 4; i++) {
-            taskFutures.add(THREAD_POOL.submit(new HeavyReader(100000, expiringStorage)));
+            taskFutures.add(THREAD_POOL.submit(new HeavyReader(100000, responseStore)));
         }
         startLatch.countDown();
 
         taskFutures.forEach(this::awaitForFuture);
-        System.out.println(expiringStorage.getClass().getSimpleName() + " average write time (in nanos): " + timesTakenToWrite.stream().collect(averagingLong((element) -> element)));
-        System.out.println(expiringStorage.getClass().getSimpleName() + " average read time (in nanos): " + timesTakenToRead.stream().collect(averagingLong((element) -> element)));
+        System.out.println(storeType + " average write time (in nanos): " + timesTakenToWrite.stream().collect(averagingLong((element) -> element)));
+        System.out.println(storeType + " average read time (in nanos): " + timesTakenToRead.stream().collect(averagingLong((element) -> element)));
     }
 
     private void awaitForFuture(Future future) {
@@ -56,18 +59,18 @@ public class ExpiringStorageLoadTest {
 
     private class HeavyWriterWithRandomData implements Runnable {
         private final int amountOfDataToWrite;
-        private final ExpiringStorage<UserResponse> expiringStorage;
+        private final UserResponseStore userResponseStore;
 
-        private HeavyWriterWithRandomData(int amountOfDataToWrite, ExpiringStorage<UserResponse> expiringStorage) {
+        private HeavyWriterWithRandomData(int amountOfDataToWrite, UserResponseStore userResponseStore) {
             this.amountOfDataToWrite = amountOfDataToWrite;
-            this.expiringStorage = expiringStorage;
+            this.userResponseStore = userResponseStore;
         }
 
         @Override
         public void run() {
             waitForStart();
             for (int i = 0; i < amountOfDataToWrite; i++) {
-                recordTimeTaken(timesTakenToWrite, () -> expiringStorage.add(new UserResponse(UUID.randomUUID().toString(), RANDOM.nextInt() % 600)));
+                recordTimeTaken(timesTakenToWrite, () -> userResponseStore.addResponse(new UserResponse(UUID.randomUUID().toString(), RANDOM.nextInt() % 600)));
             }
         }
     }
@@ -75,18 +78,18 @@ public class ExpiringStorageLoadTest {
     private class HeavyReader implements Runnable {
 
         private final int timesToRead;
-        private final ExpiringStorage<UserResponse> expiringStorage;
+        private final UserResponseStore userResponseStore;
 
-        private HeavyReader(int timesToRead, ExpiringStorage<UserResponse> expiringStorage) {
+        private HeavyReader(int timesToRead, UserResponseStore userResponseStore) {
             this.timesToRead = timesToRead;
-            this.expiringStorage = expiringStorage;
+            this.userResponseStore = userResponseStore;
         }
 
         @Override
         public void run() {
             waitForStart();
             for (int i = 0; i < timesToRead; i++) {
-                recordTimeTaken(timesTakenToRead, expiringStorage::getAll);
+                recordTimeTaken(timesTakenToRead, userResponseStore::getAllResponses);
             }
         }
     }
