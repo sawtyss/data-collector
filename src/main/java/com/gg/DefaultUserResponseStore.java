@@ -4,7 +4,7 @@ import com.gg.api.UserResponse;
 import com.gg.api.UserResponseStore;
 import com.gg.storage.ExpiringStorage;
 
-import java.util.Collection;
+import java.util.List;
 
 class DefaultUserResponseStore implements UserResponseStore {
     private ExpiringStorage<UserResponse> dataStore;
@@ -14,7 +14,7 @@ class DefaultUserResponseStore implements UserResponseStore {
     }
 
     @Override
-    public Collection<UserResponse> getAllResponses() {
+    public List<UserResponse> getAllResponses() {
         return dataStore.getAll();
     }
 

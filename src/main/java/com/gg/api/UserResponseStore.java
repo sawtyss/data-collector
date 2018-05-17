@@ -1,9 +1,9 @@
 package com.gg.api;
 
-import java.util.Collection;
+import java.util.List;
 
 public interface UserResponseStore {
-    Collection<UserResponse> getAllResponses();
+    List<UserResponse> getAllResponses();
 
     int getErrorResponseCount();
 

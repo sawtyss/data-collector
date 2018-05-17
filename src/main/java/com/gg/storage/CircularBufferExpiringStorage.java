@@ -6,7 +6,6 @@ import java.util.List;
 public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
     private final long elementTimeout;
     private final DataWithTimeStamp<E>[] storage;
-    private final Object incrementLock = new Object();
     private volatile int startIndex;
     private volatile int endIndex;
 
@@ -19,12 +18,10 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
     }
 
     @Override
-    public void add(E element) {
+    public synchronized void add(E element) {
         storage[endIndex].setData(element);
-        synchronized (incrementLock) {
-            unsafeIncrementEndIndex();
-            incrementStartIndexIfMaximumSizeReached();
-        }
+        unsafeIncrementEndIndex();
+        incrementStartIndexIfMaximumSizeReached();
     }
 
     @Override
@@ -47,7 +44,7 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
 
     private void copySplitStorageToResult(List<E> result, int startIndex, int endIndex) {
         copyContinuousStorageToResult(result, startIndex, storage.length);
-        copyContinuousStorageToResult(result, 0, endIndex+1);
+        copyContinuousStorageToResult(result, 0, endIndex + 1);
     }
 
     private void copyContinuousStorageToResult(List<E> result, int startIndex, int endIndex) {
@@ -56,11 +53,9 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
         }
     }
 
-    private void removeExpiredElements() {
-        synchronized (incrementLock) {
-            while (storage[startIndex].isOlderThan(elementTimeout) && startIndex != endIndex) {
-                unsafeIncrementStartIndex();
-            }
+    private synchronized void removeExpiredElements() {
+        while (storage[startIndex].isOlderThan(elementTimeout) && startIndex != endIndex) {
+            unsafeIncrementStartIndex();
         }
     }
 
