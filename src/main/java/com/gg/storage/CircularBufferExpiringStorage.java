@@ -32,8 +32,12 @@ public class CircularBufferExpiringStorage<E> implements ExpiringStorage<E> {
 
     private List<E> copyStorageToNewList() {
         List<E> result = new LinkedList<>();
-        int startIndex = this.startIndex;
-        int endIndex = this.endIndex;
+        int startIndex;
+        int endIndex;
+        synchronized (this) {
+            startIndex = this.startIndex;
+            endIndex = this.endIndex;
+        }
         if (endIndex < startIndex) {
             copySplitStorageToResult(result, startIndex, endIndex);
         } else {
