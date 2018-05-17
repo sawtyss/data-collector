@@ -15,6 +15,7 @@ import java.util.concurrent.Future;
 
 import static com.gg.UserResponseStores.createUserResponseStoreOnCircularBuffer;
 import static com.gg.UserResponseStores.createUserResponseStoreOnDeque;
+import static com.gg.UserResponseStores.createUserResponseStoreOnUnsynchronizedCircularBuffer;
 import static java.util.Comparator.comparing;
 import static org.fest.assertions.Assertions.assertThat;
 
@@ -40,6 +41,13 @@ public class UserResponseStoreMultiThreadTest {
     @Test
     public void shouldCircularBufferBaseHandleMultipleWritersAndNotLooseData() {
         userResponseStore = createUserResponseStoreOnCircularBuffer(1000, 100);
+
+        shouldUserResponseStoreHandleMultipleWriters();
+    }
+
+    @Test
+    public void shouldUnsynchronizedCircularBufferBaseHandleMultipleWritersAndNotLooseData() {
+        userResponseStore = createUserResponseStoreOnUnsynchronizedCircularBuffer(1000, 100);
 
         shouldUserResponseStoreHandleMultipleWriters();
     }

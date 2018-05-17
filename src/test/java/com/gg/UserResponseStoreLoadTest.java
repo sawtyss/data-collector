@@ -34,6 +34,12 @@ public class UserResponseStoreLoadTest {
         shouldStorageHandleHeavyLoad(createUserResponseStoreOnDeque(DEFAULT_TIMEOUT, 100), "Deque-based store");
     }
 
+    @Test
+    public void shouldUnsynchronizedCircularBufferStorageHandleHeavyWriters()
+    {
+        shouldStorageHandleHeavyLoad(createUserResponseStoreOnUnsynchronizedCircularBuffer(DEFAULT_TIMEOUT, 100), "Unsynchronized circular buffer-based store");
+    }
+
     private void shouldStorageHandleHeavyLoad(UserResponseStore responseStore, String storeType) {
         for (int i = 0; i < 4; i++) {
             taskFutures.add(THREAD_POOL.submit(new HeavyWriterWithRandomData(100000, responseStore)));
