@@ -25,16 +25,6 @@ public class UserResponseStoreLoadTest {
     private Collection<Future> taskFutures = new LinkedList<>();
 
     @Test
-    public void shouldCircularBufferStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(createUserResponseStoreOnCircularBuffer(DEFAULT_TIMEOUT, 100), "Circular buffer-based store");
-    }
-
-    @Test
-    public void shouldDequeStorageHandleHeavyWriters() {
-        shouldStorageHandleHeavyLoad(createUserResponseStoreOnDeque(DEFAULT_TIMEOUT, 100), "Deque-based store");
-    }
-
-    @Test
     public void shouldUnsynchronizedCircularBufferStorageHandleHeavyWriters()
     {
         shouldStorageHandleHeavyLoad(createUserResponseStoreOnUnsynchronizedCircularBuffer(DEFAULT_TIMEOUT, 100), "Unsynchronized circular buffer-based store");

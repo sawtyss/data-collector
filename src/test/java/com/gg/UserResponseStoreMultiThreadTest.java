@@ -4,8 +4,6 @@ import com.gg.api.UserResponse;
 import com.gg.api.UserResponseStore;
 import org.junit.Test;
 
-import java.util.Collection;
-import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.CountDownLatch;
@@ -13,8 +11,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
-import static com.gg.UserResponseStores.createUserResponseStoreOnCircularBuffer;
-import static com.gg.UserResponseStores.createUserResponseStoreOnDeque;
 import static com.gg.UserResponseStores.createUserResponseStoreOnUnsynchronizedCircularBuffer;
 import static java.util.Comparator.comparing;
 import static org.fest.assertions.Assertions.assertThat;
@@ -30,20 +26,6 @@ public class UserResponseStoreMultiThreadTest {
     private int statusCodeCounter;
 
     private UserResponseStore userResponseStore;
-
-    @Test
-    public void shouldDequeBaseHandleMultipleWritersAndNotLooseData() {
-        userResponseStore = createUserResponseStoreOnDeque(1000, 100);
-
-        shouldUserResponseStoreHandleMultipleWriters();
-    }
-
-    @Test
-    public void shouldCircularBufferBaseHandleMultipleWritersAndNotLooseData() {
-        userResponseStore = createUserResponseStoreOnCircularBuffer(1000, 100);
-
-        shouldUserResponseStoreHandleMultipleWriters();
-    }
 
     @Test
     public void shouldUnsynchronizedCircularBufferBaseHandleMultipleWritersAndNotLooseData() {
